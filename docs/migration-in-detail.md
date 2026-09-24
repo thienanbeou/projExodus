@@ -19,8 +19,12 @@ aliases:
 	- Partitioned storage: 69 GB root LV, 141 GB thin pool for VM/CT disks
 	- Confirmed DC UPS is powering node1 
 	Full commands and output in [node1-validation](<./node1-validation.md>)
-- Rightsizing assets: 
-	- Nextcloud: decision on the PvO v4 folder, 146 of the 150 GB, drop or defer since an external copy exists...
+- Rightsizing assets:  
+	- Nextcloud rightsizing:
+		- Decision: keep config (config.php, Postgres DB with users, apps, shares) and drop all file data (full 150GB html volume, PvO v4 included), since a safe external copy of PvO v4 exists
+		- Post restore step (not yet done, planned for after migration): run `occ files:cleanup` on node1 to clear orphaned filecache entries left by the dropped files, so the instance doesn't carry stale references
+		- Consequence: Nextcloud drops out of the storage bound tier, shrinking bulk data to roughly Immich's 89GB plus Crafty's ~8.3GB (both under node1's 141GB thin pool), and reclassifies from Wave 2 to Wave 1.5 alongside Navidrome and Crafty, since it's now config only rather than storage bound
+		- Open: Wave 1 / Wave 1.5 Docker host colocation, still pinned from earlier
 	- Crafty: 
 		- Audited both servers' backup folders on disk and cross checked against Crafty's Backup tab
 		- IRUSModdedSV: culprit. Its "Default Backup" config had Max Backups: 0 (unlimited), producing 105 uncapped files since June, ~37 GB

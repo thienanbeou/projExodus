@@ -4,10 +4,10 @@
 - Therefore a migration to a more stable platform - [node1](<#target-node1>) - is necessary. 
 - Codename: projExodus, as a commemorable name for the move off the old hardware.
 ## Migration Overview
-- [Phase 1](docs/migration-in-detail.md#phase-1): Dry discovery 
+- [Phase 1](<./docs/migration-in-detail.md#phase-1>): Dry discovery 
 	- Ran read-only script that scans the inventory of debianWozzy. The script covered full service inventory
 	- Which eventually led to the decision of what's staying vs. retiring
-- [Phase 2](docs/migration-in-detail.md#phase-2): Prepare
+- [Phase 2](<./docs/migration-in-detail.md#phase-2>): Prepare
 	- Validate migration destination 
 	- Rightsizing assets 
 		- Nextcloud rightsizing  
