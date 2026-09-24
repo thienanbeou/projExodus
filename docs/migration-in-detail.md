@@ -31,3 +31,16 @@ aliases:
 		- IRUSMinecraftServer: fine. Its "scheduledBackup" config (Max Backups: 5) was working correctly, ~8.3 GB. Also had 1 orphaned backup (586 MB) from a dead config
 		- Fix: capped IRUSModdedSV's Default Backup at 5, deleted 100 stale files (~35 GB freed) plus the orphaned one
 		Full audit in [crafty-backup-audit](<./crafty-backup-audit.md>)
+
+## Phase 3 
+### Wave 1: Pi-hole + Unbound (pihole-dns LXC)
+- Sizing
+	- 1 vCPU / 512MB RAM / 4GB disk.
+- Tailscale-in-LXC gotcha
+	- Unprivileged containers need `/dev/net/tun` explicitly granted from the Proxmox host before Tailscale will start. Fixed via [enable-lxc-tun.sh](<../scripts/enable-lxc-tun.sh>) (`lxc.cgroup2.devices.allow: c 10:200 rwm` + `lxc.mount.entry: /dev/net dev/net none bind,create=dir` in the container's `.conf`, then restart).
+- The listeningMode gotcha
+	- Pi-hole's default `listeningMode = LOCAL` silently drops queries from Tailscale-sourced clients, since Tailscale's mesh routing doesn't present as a normal local subnet to FTL. Symptom: works fine from localhost, works fine from LAN, times out specifically for tailnet-sourced queries once nothing else is around to answer. Fix: `pihole-FTL --config dns.listeningMode ALL` + restart.
+- R3P `accept-dns=false` decision
+	- R3P is itself a tailnet member, so without this it would passively inherit the DNS policy meant for personal devices, coupling its own system resolution (NTP, package checks) to this stack's uptime. Opted out deliberately, backed by the same pattern found in OpenWrt/Tailscale's own GitHub issues of routers/exit-nodes commonly running with this flag for exactly this reason.
+- Cutover validation
+	- Tested from my Legion laptop and from debianWozzy itself (now just an ordinary tailnet client) post-removal of debianWozzy's old nameserver entry, confirmed both real resolution and ad-blocking work correctly with only `pihole-dns` active.
