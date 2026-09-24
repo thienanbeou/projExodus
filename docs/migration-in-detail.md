@@ -33,7 +33,7 @@ aliases:
 		Full audit in [crafty-backup-audit](<./crafty-backup-audit.md>)
 
 ## Phase 3 
-### Wave 1: Pi-hole + Unbound (pihole-dns LXC)
+### Wave 1: Pi-hole and Unbound (pihole-dns LXC)
 - Sizing
 	- 1 vCPU / 512MB RAM / 4GB disk.
 - Tailscale-in-LXC gotcha
