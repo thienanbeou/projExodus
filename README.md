@@ -4,20 +4,20 @@
 - Therefore a migration to a more stable platform - [node1](<#target-node1>) - is necessary. 
 - Codename: projExodus, as a commemorable name for the move off the old hardware.
 ## Migration Overview
-- Phase 1: Dry discovery 
+- [Phase 1](docs/migration-in-detail.md#phase-1): Dry discovery 
 	- Ran read-only script that scans the inventory of debianWozzy. The script covered full service inventory
 	- Which eventually led to the decision of what's staying vs. retiring
-- Phase 2: Prepare
+- [Phase 2](docs/migration-in-detail.md#phase-2): Prepare
 	- Validate migration destination 
 	- Rightsizing assets 
-		- Nextcloud rightsizing 
+		- Nextcloud rightsizing  
 		- Drop unnecessary Crafty backups 
 - Phase 3: Lift & Shift
 	- Wave 1: Core services
 		- Pi-hole + Unbound into an LXC, along with its current configuration
 		- Vaultwarden + the monitoring stack into a Docker VM, along with their current configuration
 	- Wave 1.5: Crafty
-		- Crafty requires having a fast, consistent inbound connection, which is equivalent to portforwarding. I have no intention to open an online server right now, so the networking for Crafty is not a priority. Just move its current setup configuration over, along with a few backup copies, is enough. 
+		- Crafty requires having a fast, consistent inbound connection, which is equivalent to portforwarding. I have no intention to open an online server right now, so the networking for Crafty is not a priority. Just move its current setup configuration over, along with a few backup copies, is enough.
 	- Wave 2: Storage bound
 		- Immich, along with its current configuration and media contents inside it
 		- Nextcloud and Navidrome, along with its configuration and a few light items stored inside Nextcloud. I do have an external extra backup that can be imported into Nextcloud later and have Navidrome based on that backup once it's imported. 
@@ -67,30 +67,6 @@ Retiring, not migrating: CasaOS and the rclone, devmon and mergerfs helpers it b
 - node1 sits behind the R3P on 192.168.2.0/24, and the R3P still reaches the Viettel router over a 2.4 GHz Wi-Fi uplink with its own NAT. 
 - The ES208G switch arriving should change that picture, and internet rewiring between the current hardware deck is needed before proceeding.
 
-## Migration In-detail
-### Phase 1
-- Ran [homelab-inventory.sh](<./scripts/homelab-inventory.sh>) against debianWozzy: read only, made no changes to the running system. 
-- Collected, per service: name, version, runtime type (Docker, CasaOS-managed Docker, or host systemd), data paths and sizes, ports, and network config. Full results in [pre-migration Asset Inventory](<#pre-migration-asset-inventory>): 14 services, 287 GB total data. 
-- Staying vs. retiring, decided from these results: 
-	- **Retiring:** CasaOS and its rclone, devmon, and mergerfs helpers, which are redundant once Proxmox handles storage and VM management directly. Samba, which only has the default homes and printers shares with nothing depending on it. Apache, which only serves an unused default site on 8081. The desktop stack (lightdm, cups, ModemManager, wpa_supplicant), leftover from running a GUI on a laptop and not needed on a headless target. Winbind, Avahi-daemon. 
-	- **Staying:** every service in the Asset Inventory table, migrating per its assigned wave. 
-![](<./images/homelab-inventory.png>)
 
-### Phase 2
-- Validated migration destination (node1): 
-	- Ran memtest and stress-ng: both passed
-	- Confirmed Wake-on-LAN end to end from the R3P, including at cold boot 
-	- Set static IP 192.168.2.149 and hostname pve behind the R3P 
-	- Partitioned storage: 69 GB root LV, 141 GB thin pool for VM/CT disks
-	- Confirmed DC UPS is powering node1 
-	Full commands and output in [node1-validation](<./docs/node1-validation.md>)
-- Rightsizing assets: 
-	- Nextcloud: decision on the PvO v4 folder, 146 of the 150 GB, drop or defer since an external copy exists...
-	- Crafty: 
-		- Audited both servers' backup folders on disk and cross checked against Crafty's Backup tab
-		- IRUSModdedSV: culprit. Its "Default Backup" config had Max Backups: 0 (unlimited), producing 105 uncapped files since June, ~37 GB
-		- IRUSMinecraftServer: fine. Its "scheduledBackup" config (Max Backups: 5) was working correctly, ~8.3 GB. Also had 1 orphaned backup (586 MB) from a dead config
-		- Fix: capped IRUSModdedSV's Default Backup at 5, deleted 100 stale files (~35 GB freed) plus the orphaned one
-		Full audit in [crafty-backup-audit](<./docs/crafty-backup-audit.md>)
 ## Migration Aftermath
 - ....
