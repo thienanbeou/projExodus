@@ -20,7 +20,7 @@
 	- [Wave 1.5: Crafty](<./docs/migration-in-detail.md#wave-15-crafty>)
 		- Crafty requires a fast, consistent inbound connection, equivalent to port forwarding. No intention to open an online server right now, so its networking isn't a priority
 		- Scope changed from migrating Crafty to archiving what's needed and retiring the app entirely: IRUSMinecraftServer's saves, mods, and configuration were archived and staged for Nextcloud; IRUSModdedSV was dropped as a determined reduction, nothing retained
-	- Wave 2
+	- Wave 2:
 		- Vaultwarden + Nextcloud + Navidrome as a Docker VM, along with their configuration. An external backup exists that can be imported into Nextcloud later, with Navidrome pointed at it once imported. The staged Crafty archive also lands in Nextcloud here
 	- Wave 3: Critical Immich
 		- Immich as its own Docker VM, along with its current configuration and media contents

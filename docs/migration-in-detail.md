@@ -23,8 +23,7 @@ aliases:
 	- Nextcloud rightsizing:
 		- Decision: keep config (config.php, Postgres DB with users, apps, shares) and drop all file data (full 150GB html volume, PvO v4 included), since a safe external copy of PvO v4 exists
 		- Post restore step (not yet done, planned for after migration): run `occ files:cleanup` on node1 to clear orphaned filecache entries left by the dropped files, so the instance doesn't carry stale references
-		- Consequence: Nextcloud drops out of the storage bound tier, shrinking bulk data to roughly Immich's 89GB plus Crafty's ~8.3GB (both under node1's 141GB thin pool), and reclassifies from Wave 2 to Wave 1.5 alongside Navidrome and Crafty, since it's now config only rather than storage bound
-		- Open: Wave 1 / Wave 1.5 Docker host colocation, still pinned from earlier
+		- Consequence: Nextcloud drops out of the storage bound tier, shrinking bulk data to roughly Immich's 89GB plus Crafty's ~8.3GB (both under node1's 141GB thin pool); stays in Wave 2 alongside Vaultwarden and Navidrome, sharing one Docker VM
 	- Crafty: 
 		- Audited both servers' backup folders on disk and cross checked against Crafty's Backup tab
 		- IRUSModdedSV: culprit. Its "Default Backup" config had Max Backups: 0 (unlimited), producing 105 uncapped files since June, ~37 GB
@@ -87,3 +86,21 @@ aliases:
 - Crafty app, its Docker container, and its sqlite DB (`config/db/crafty.sqlite`) are not migrated; retired along with the rest of Crafty per the Phase 1 retiring list
 - Open item: `IRUSMinecraftServer-archive-20260925.tar.gz` is consolidated and staged, waiting on Nextcloud being live on node1 (Wave 2) before final extraction there.
 
+### Wave 2: Vaultwarden, Nextcloud and Navidrome
+- For Nextcloud, scope changed from migrating itself to retiring the app entirely, since Nextcloud was mainly used to archive Navidrome's music library - PvO v4; but now that importing PvO v4 into a freshly installed Nextcloud is more operational efficient, theres no need for Nextcloud migration.
+- Provisioning: full Debian 13 minimal VM (VMID 100, "dockerVM") on node1. Sized 2 vCPU, 3GB RAM, 20GB disk; Docker Engine and compose plugin installed via get.docker.com
+- Data transfer: Vaultwarden's `/DATA/AppData/data` (1.9MB) and Navidrome's `/DATA/AppData/navidrome/data` (210MB) rsynced from debianWozzy into `/srv/docker/vaultwarden/data` and `/srv/docker/navidrome/data` on dockerVM, staged through a regular-user folder first to dodge the same sudo-over-rsync issue hit in Wave 1. Both source folders were owned root:root on debianWozzy, so no chown was needed on the destination
+- Navidrome's `/music` mount left commented out in compose, since it points at Nextcloud's PvO v4 folder which doesn't exist yet on this fresh install; tracks read as missing until PvO v4 is reimported, but the library index, playlists and settings all carried over intact
+- tsdproxy routing: debianWozzy's tsdproxy used Docker labels rather than a central routing config (`tsdproxy.enable`, `tsdproxy.name`, and `tsdproxy.container_port` where the image doesn't declare a default). Old tailnet nodes for Vaultwarden and Navidrome deleted from the Tailscale admin console before bringing the new tsdproxy container up. Vaultwarden published as `vaultwarden`, Navidrome as `music` on container port 4533, Nextcloud as `cloud`
+- Cutover validation: Vaultwarden vault loaded with all existing entries; Navidrome's full library index, artwork and playlists present; Nextcloud completed first-run setup cleanly against the Postgres container. All three reachable and fast (sub-second) after the targetHostname fix
+![](<../images/vaultwardenPostMigration.png>)
+![](<../images/navidromePostMigration.png>)
+- **Open items:** old debianWozzy instances of Vaultwarden, Nextcloud and Navidrome not yet decommissioned; a recurring `401` on Navidrome's `/api/events` endpoint noticed post-migration, not yet investigated; Vaultwarden's running version not yet confirmed against the intended `1.37.1` pin; `prometheus.yml`'s `blackbox_tailscale_*` targets still point at debianWozzy's old address for all three services, now that Wave 2 has landed this is the trigger point for that single-pass update
+
+### Wave 2.5: Crafty archive extraction
+- With Nextcloud live on node1, `IRUSMinecraftServer-archive-20260925.tar.gz` transferred from debianWozzy to dockerVM over Tailscale (992MB), then extracted directly into Nextcloud's data volume at a new `MinecraftArchive` folder created via the web UI first
+- Ownership fixed to `33:33` (www-data) to match Nextcloud's container user, then `occ files:scan --path="wozzy/files/MinecraftArchive"` run to index the files, since they landed on disk outside the web UI/sync client and wouldn't otherwise appear in Nextcloud's database
+- Verified: all 9 items present (`mods`, `world`, four JSON files, `eula.txt`, `fabric-1.21.11.jar`, `server.properties`), 1.4GB total, matching the original archive
+- Closes the last open item from Wave 1.5
+![](<../images/minecraftPostMigration.png>)
+![](<../images/minecraftPostMigration2.png>)
