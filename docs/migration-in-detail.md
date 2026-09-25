@@ -72,6 +72,18 @@ aliases:
 > [!NOTE]
 > The jump in Memory Basic marks the handoff point, debianWozzy's data giving way to node1's data, both sitting in the same graph. That's concrete proof the historical data and the live host are genuinely different machines, not just a relabeled dashboard. 
 > Before the jump, this is debianWozzy's old node_exporter data, whose `Total` sits at 7.64GiB, matching debianWozzy's real 8GB of RAM. After the jump, node_exporter is running inside the monitoring LXC on node1, and since it reads the host's own /proc/meminfo, therefore `Total` reflects node1's actual 16GB of physical RAM instead.
-
 - Open item, parked deliberately
 	- `prometheus.yml`'s `blackbox_tailscale_*` targets still point at debianWozzy's Tailscale address (100.96.106.8) for services not yet migrated (Vaultwarden, Nextcloud, Navidrome, Crafty). Left as is on purpose, to be redirected in one pass once the final migration wave lands rather than updated piecemeal as each service moves.
+
+
+### Wave 1.5: Crafty
+- Scope changed from migrating Crafty itself to archiving what's needed and retiring the app entirely
+- Container discovery: real container name is `crafty-container` (CasaOS renamed it from the compose service name), image `registry.gitlab.com/crafty-controller/crafty-4:4.4.11`, appdata at `/DATA/AppData/crafty`
+- Two servers identified by UUID and mapped via backup size against the original audit:
+	- `9eb792ca-f698-4fef-9140-310da2b13623` = IRUSModdedSV (NeoForge, MC 1.21.1, ~90 mods, Create-based modpack)
+	- `f5c39984-36c8-4a70-a111-f7ed2b7996c9` = IRUSMinecraftServer (Fabric, live version confirmed as MC 1.21.11 via `logs/*.log.gz` grep for "Starting minecraft server version"; a stray 1.21.10 jar/version folder was present but unused and left out of the archive)
+- IRUSModdedSV: determined reduction. Dropped entirely, no saves, config, or mods retained. `rm -rf` on both its server and backups folders, ~717MB reclaimed (360MB live + 357MB backups)
+- IRUSMinecraftServer: archived. `world`, `mods`, `server.properties`, `eula.txt`, `ops.json`, `whitelist.json`, `banned-players.json`, `banned-ips.json`, and `fabric-1.21.11.jar` tarred to `IRUSMinecraftServer-archive-20260925.tar.gz` (947MB), verified (file count and tail of archive listing both checked) and copied off debianWozzy
+- Crafty app, its Docker container, and its sqlite DB (`config/db/crafty.sqlite`) are not migrated; retired along with the rest of Crafty per the Phase 1 retiring list
+- Open item: `IRUSMinecraftServer-archive-20260925.tar.gz` is consolidated and staged, waiting on Nextcloud being live on node1 (Wave 2) before final extraction there.
+
