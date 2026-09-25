@@ -13,7 +13,7 @@
 		- Nextcloud rightsizing  
 		- Drop unnecessary Crafty backups 
 - [Phase 3](<./docs/migration-in-detail.md#phase-3>): Lift & Shift
-	- [Wave 1](<./docs/migration-in-detail.md#wave-1-pi-hole-and-unbound-pihole-dns-lxc>): Core services
+	- [Wave 1:](<./docs/migration-in-detail.md#wave-1>) Core services
 		- Pi-hole + Unbound into an LXC, along with its current configuration
 		- Vaultwarden + the monitoring stack into a Docker VM, along with their current configuration
 	- Wave 1.5: Crafty
