@@ -3,27 +3,31 @@
 ![](<./images/debianWozzy.png>)
 - Therefore a migration to a more stable platform - [node1](<#target-node1>) - is necessary. 
 - Codename: projExodus, as a commemorable name for the move off the old hardware.
+
 ## Migration Overview
-- [Phase 1](<./docs/migration-in-detail.md#phase-1>): Dry discovery 
-	- Ran read-only script that scans the inventory of debianWozzy. The script covered full service inventory
-	- Which eventually led to the decision of what's staying vs. retiring
+- [Phase 1](<./docs/migration-in-detail.md#phase-1>): Dry discovery
+	- Ran a read-only script that scanned the full service inventory of debianWozzy
+	- Led to the decision of what's staying vs. retiring
 - [Phase 2](<./docs/migration-in-detail.md#phase-2>): Prepare
-	- Validate migration destination 
-	- Rightsizing assets 
-		- Nextcloud rightsizing  
-		- Drop unnecessary Crafty backups 
+	- Validated migration destination (node1)
+	- Rightsized assets
+		- Nextcloud rightsizing
+		- Dropped unnecessary Crafty backups
 - [Phase 3](<./docs/migration-in-detail.md#phase-3>): Lift & Shift
-	- [Wave 1:](<./docs/migration-in-detail.md#wave-1>) Core services
-		- Pi-hole + Unbound into an LXC, along with its current configuration
-		- Vaultwarden + the monitoring stack into a Docker VM, along with their current configuration
-	- Wave 1.5: Crafty
-		- Crafty requires having a fast, consistent inbound connection, which is equivalent to portforwarding. I have no intention to open an online server right now, so the networking for Crafty is not a priority. Just move its current setup configuration over, along with a few backup copies, is enough.
-	- Wave 2: Storage bound
-		- Immich, along with its current configuration and media contents inside it
-		- Nextcloud and Navidrome, along with its configuration and a few light items stored inside Nextcloud. I do have an external extra backup that can be imported into Nextcloud later and have Navidrome based on that backup once it's imported. 
-- Phase 4: Retire 
-	- Decommission CasaOS, Samba, Apache
+	- [Wave 1](<./docs/migration-in-detail.md#wave-1>): Core service
+		- Pi-hole + Unbound migrated into an LXC, along with its current configuration; cut over as the tailnet's DNS nameserver
+		- Monitoring stack (Prometheus, Grafana, Blackbox, cAdvisor, node_exporter) migrated into its own LXC, along with its configuration and historical data
+	- [Wave 1.5: Crafty](<./docs/migration-in-detail.md#wave-15-crafty>)
+		- Crafty requires a fast, consistent inbound connection, equivalent to port forwarding. No intention to open an online server right now, so its networking isn't a priority
+		- Scope changed from migrating Crafty to archiving what's needed and retiring the app entirely: IRUSMinecraftServer's saves, mods, and configuration were archived and staged for Nextcloud; IRUSModdedSV was dropped as a determined reduction, nothing retained
+	- Wave 2
+		- Vaultwarden + Nextcloud + Navidrome as a Docker VM, along with their configuration. An external backup exists that can be imported into Nextcloud later, with Navidrome pointed at it once imported. The staged Crafty archive also lands in Nextcloud here
+	- Wave 3: Critical Immich
+		- Immich as its own Docker VM, along with its current configuration and media contents
+- Phase 4: Retire
+	- Decommission CasaOS, Samba, Apache, Crafty
 	- Repurpose the ASUS laptop if needed
+
 ## Pre-migration Asset Inventory
 ### Source host: debianWozzy
 - ASUS X550LN, i5-4200U (2C/4T), 8 GB DDR3L, single 750 GB WD7500BPKX HDD (25,932 power-on hours, SMART clean). 
