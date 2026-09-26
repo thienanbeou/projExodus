@@ -22,11 +22,12 @@
 		- Scope changed from migrating Crafty to archiving what's needed and retiring the app entirely: IRUSMinecraftServer's saves, mods, and configuration were archived and staged for Nextcloud; IRUSModdedSV was dropped as a determined reduction, nothing retained
 	- [Wave 2:](<./docs/migration-in-detail.md#wave-2-vaultwarden-nextcloud-and-navidrome>)
 		- Vaultwarden + Nextcloud + Navidrome as a Docker VM, along with their configuration. An external backup exists that can be imported into Nextcloud later, with Navidrome pointed at it once imported. The staged Crafty archive also lands in Nextcloud here
-	- Wave 3: Critical Immich
-		- Immich as its own Docker VM, along with its current configuration and media contents
-- Phase 4: Retire
-	- Decommission CasaOS, Samba, Apache, Crafty
-	- Repurpose the ASUS laptop if needed
+	- [Wave 3](<./docs/migration-in-detail.md#wave-3-immich>): Critical Immich
+		- Immich as its own full Debian VM, along with its current configuration and media contents
+- [Phase 4](<./docs/migration-in-detail.md#phase-4>): Retire
+	- Wipe debianWozzy wholesale 
+	- Add the scavenged HDD to node1; decide split vs single-disk for PvO v4 / Immich photos
+	- Reimport PvO v4 into Nextcloud (uncomment Navidrome's `/music` mount after) 
 
 ## Pre-migration Asset Inventory
 ### Source host: debianWozzy
@@ -73,4 +74,7 @@ Retiring, not migrating: CasaOS and the rclone, devmon and mergerfs helpers it b
 
 
 ## Migration Aftermath
-- ....
+
+### Network
+- node1 sits behind the R3P on 192.168.2.0/24, and the R3P still reaches the Viettel router over a 2.4 GHz Wi-Fi uplink with its own NAT. 
+- A TP-Link Omada ES208G switch is now physically installed between the R3P and node1 (192.168.2.148), resolving the rewiring this section originally flagged as blocking.
