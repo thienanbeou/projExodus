@@ -1,8 +1,15 @@
+# projExodus Summary
+
+> I moved a 13 service homelab (DNS, monitoring, password manager, file sync, music, photo library) off a failing laptop onto a Proxmox VE node, in risk-ordered waves.
+> - No data lost: Immich checksum-verified (5,233 files, 0 missing), PvO v4 3,833/3,833 files indexed
+> - Recovers from power cuts unattended: clean UPS shutdown, then Wake-on-LAN. The old host needed someone on site for every outage and often failed to POST on a cold start
+> - Automated tests : 3/3 power cuts recovered (median 210 s), plus 20/20 simulated outages run unattended with a 9 s spread (215 to 224 s). Each trial also checked the measuring instrument, so a bad measurement couldn't count as a result.
+
 ## Introduction
 - debianWozzy, the old homelab host, had become unstable with age. It regularly got stuck at BIOS and failed to boot into Debian/CasaOS on cold starts. On top of that, its laptop board had no Wake-on-LAN support, which the onsite location needs since it sometimes loses power without warning.
 ![](<./images/debianWozzy.png>)
 - So everything had to move to a more stable platform: [node1](<#target-node1>).
-- Codename: projExodus, commemorating the move off the old hardware.
+- Codename: projExodus (project Exodus), commemorating the move off the old hardware.
 
 ## Table of Contents
 - [Introduction](<#introduction>)
