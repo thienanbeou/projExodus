@@ -72,6 +72,7 @@ aliases:
 > [!NOTE]
 > The jump in Memory Basic marks the handoff point, debianWozzy's data giving way to node1's data, both sitting in the same graph. That's concrete proof the historical data and the live host are genuinely different machines, not just a relabeled dashboard. 
 > Before the jump, this is debianWozzy's old node_exporter data, whose `Total` sits at 7.64GiB, matching debianWozzy's real 8GB of RAM. After the jump, node_exporter is running inside the monitoring LXC on node1, and since it reads the host's own /proc/meminfo, therefore `Total` reflects node1's actual 16GB of physical RAM instead.
+- Downtime gap in the graph is around 8 mins.
 - Open item, parked deliberately
 	- ~~`prometheus.yml`'s `blackbox_tailscale_*` targets still point at debianWozzy's Tailscale address (100.96.106.8) for services not yet migrated (Vaultwarden, Nextcloud, Navidrome, Crafty). Left as is on purpose, to be redirected in one pass once the final migration wave lands rather than updated piecemeal as each service moves.~~
 	- done
@@ -145,7 +146,92 @@ aliases:
 	- prometheus-pve-exporter on pve for host and thin pool metrics.
 
 ## Phase 4
-- HDD health 
-	- `smartctl -t long` on the WD7500BPKX before pulling it: result 
-- Backup strategy 
-	- The scavenged HDD becomes plain bulk storage, with no PBS. Backups for Immich and PvO v4 are planned for a future NAS on node2. Until then: single copy on node1 accepted / stopgap copy on the external drive
+### HDD
+- HDD health
+	- `smartctl -t long` on the WD7500BPKX before pulling it: extended self-test completed without error; Reallocated_Sector_Ct, Current_Pending_Sector and Offline_Uncorrectable all 0.
+![](<../images/smartctlselfttest.png>)
+- Install
+	- Physically moved into node1, where it showed up as `sdb` with debianWozzy's old layout still on it (976M EFI, 689.8G ext4 root, 7.9G swap). Re-checked SMART from pve: still PASSED, same three counters at 0.
+![](<../images/oldHDD1.png>)
+- Proxmox's Create: Thinpool dialog only lists disks with no partition table, so `sdb` didn't show up at all. Everything on it already had copies elsewhere, so wiped it whole via Disks > Wipe Disk.
+![](<../images/oldHDD2.png>)
+- `hdd-thin` pool
+	- Created from Disks > LVM-Thin > Create: Thinpool, name `hdd-thin`, Add Storage checked, so the VG, the thin pool and the Proxmox storage entry all come out of one step.
+	- Result: ~684.5 GiB data LV plus ~7 GiB metadata LV (Proxmox defaults metadata to 1% of the disk, far more than this pool needs, but harmless). Shows as 735 GB in the GUI. Took ~3 minutes on the 5400rpm laptop drive, versus seconds on an SSD.
+- Carving it up
+	- dockerVM (100): 300 GiB `scsi1` for Nextcloud data. immich (103): 250 GiB `scsi1` for Immich originals. Both with Discard and IO thread on, SSD emulation off.
+	- 550 of ~684 GiB allocated, ~130 GiB left for future guests. Unlike `local-lvm`, this pool is deliberately not overcommitted: a full thin pool stalls every guest writing to it.
+![](<../images/extendNextcloud.png>)
+![](<../images/createHDDThin.png>)
+- Inside each guest
+	- Formatted the whole device ext4 (labels `nextcloud-hdd` and `immich-hdd`), mounted at `/mnt/hdd` by UUID:
+```shell
+UUID=<uuid> /mnt/hdd ext4 defaults,noatime,nofail 0 2
+```
+- Also:
+	- `nofail` so a missing HDD doesn't drop a Tailscale-only VM into emergency mode. The apps then fail safe on their own: Docker bind-mounts an empty folder, Nextcloud finds no `.ncdata` and Immich finds no `.immich` markers, and both refuse to start rather than run on an empty library.
+	- `tune2fs -m 1` on both: ext4's default 5% root reserve is wasted on a pure data disk. Reclaimed ~12 GB on dockerVM (280G to 292G available) and ~10 GB on immich (233G to 243G).
+
+### Nextcloud data
+- Nextcloud's data was already its own bind mount (`/srv/docker/nextcloud/data:/var/www/html/data`), separate from the app code in `html`. Only the host side changes, the container still sees `/var/www/html/data`, so `config.php` and the DB need no edits. DB and `html` stay on the SSD.
+- Steps:
+```shell
+docker exec -u www-data nextcloud php occ maintenance:mode --on
+docker compose stop nextcloud nextcloud-cron
+sudo rsync -aHAX --info=progress2 /srv/docker/nextcloud/data/ /mnt/hdd/nextcloud/data/
+sudo mv /srv/docker/nextcloud/data /srv/docker/nextcloud/data.old
+sed -i 's#/srv/docker/nextcloud/data:/var/www/html/data#/mnt/hdd/nextcloud/data:/var/www/html/data#' ~/docker-compose.yml
+docker compose up -d nextcloud nextcloud-cron
+docker exec -u www-data nextcloud php occ maintenance:mode --off
+```
+- The `sed` hits both `nextcloud` and `nextcloud-cron`, which share the same mounts. Trailing slashes on the rsync carry the data dir's own `www-data` ownership and `0770` mode over.
+- Validated: `occ status` reported installed, maintenance off, no DB upgrade needed; existing files (MinecraftArchive included) all present in the web UI. `data.old` deleted afterwards.
+
+### Music library
+- Transfer
+	- PvO v4 came back from the external copy on my Legion laptop. Both the laptop and dockerVM sit behind the R3P, so it went over the LAN rather than through Tailscale, using rsync from WSL (resumable, unlike Windows `scp`):
+```shell
+rsync -rth --partial --info=progress2 "/mnt/e/archive/PvO v4" wozzy@192.168.2.127:/mnt/hdd/staging/
+```
+- Transfer state
+	- 159.49 GB, 3,833 files, 1h07m at ~38 MB/s (bound by 5 GHz Wi-Fi and WSL reading through `/mnt/e`). A second dry run afterwards found nothing left to send.
+![](<../images/rsyncPvo.png>)
+- Handoff to Nextcloud
+	- `mv` into `wozzy/files/` (instant, same filesystem), `chown -R www-data:www-data`, then `occ files:scan --path="wozzy/files/PvO v4"` so Nextcloud indexes files it didn't upload itself.
+	- Rescan: 713 folders, 3,833 files, 0 errors. File count matches rsync's exactly.
+![](<../images/pvoPostMigration.png>)
+- Navidrome
+	- The `/music` line commented out since Wave 2 also had the wrong path: Nextcloud keeps user files under `data/<user>/files/`, so it was missing a level. Corrected, quoted for the space, still read-only:
+	```yaml
+	      - "/mnt/hdd/nextcloud/data/wozzy/files/PvO v4:/music:ro"
+	```
+	- `docker compose up -d navidrome`, full rescan on boot, library back and playable.
+![](<../images/navidromePostMigration 1.png>)
+
+### Immich
+- Starting point
+	- Everything lived under `UPLOAD_LOCATION=./library` on the SSD, mounted at `/data`: `library` 73G (originals), `encoded-video` 15G, `upload` 196M, `backups` 379M (Immich's DB dumps), `thumbs` 538M, `profile` 8K. Root disk at 96%, 4.9G free.
+- Split
+	- To the HDD: `library`, `upload`, `encoded-video`, `backups`. `upload` goes with `library` so Immich's move from one to the other stays a same-disk rename. `backups` on the HDD puts the DB dumps on a different disk than the DB itself.
+	- Stays on the SSD: `thumbs` (read constantly while scrolling the timeline), `profile`, Postgres.
+- Approach: bind mounts over subfolders
+	- Immich's DB stores absolute paths like `/data/library/...`, so the container-side paths can't change. Pointing `UPLOAD_LOCATION` at the HDD would have dragged `thumbs` along, and symlinks don't work since the container can only see what's mounted into it.
+	- Kept `./library:/data` and mounted the four HDD folders on top of their subfolders, which Docker allows (deeper mounts shadow shallower ones):
+	```yaml
+	    volumes:
+	      - ${UPLOAD_LOCATION}:/data
+	      - /mnt/hdd/immich/library:/data/library
+	      - /mnt/hdd/immich/upload:/data/upload
+	      - /mnt/hdd/immich/encoded-video:/data/encoded-video
+	      - /mnt/hdd/immich/backups:/data/backups
+	      - /etc/localtime:/etc/localtime:ro
+	```
+	- Side effect worth having: the SSD originals stay underneath, untouched and invisible to Immich, as a frozen copy. Rollback is deleting the four lines.
+- Transfer
+	- Stopped `immich-server` and `immich-machine-learning` (Postgres stays up, nothing writes without the server), then `rsync -aHAX` per folder. `library` 78.35 GB in 16m38s at ~75 MB/s, which is about this HDD's ceiling.
+	- Verified with per-folder file counts, SSD vs HDD: 1625/1625, 2/2, 262/262, 15/15.
+- Cutover validation
+	- Clean startup, no folder integrity errors (the `.immich` markers came across with rsync). Old photo at full size, video playback, and a fresh upload from my phone all worked, and the upload landed under `/mnt/hdd/immich/library`.
+- Cleanup
+	- Deleted the now-shadowed SSD copies of `encoded-video`, `upload` and `backups` (~16G). Kept `~/immich/library/library` (73G) as the frozen copy.
+	- `fstrim -av` inside the VM handed 25.3 GiB back to `local-lvm`: space freed inside a guest isn't returned to a thin pool until the guest trims it, which only works because the disks have `discard=on`.

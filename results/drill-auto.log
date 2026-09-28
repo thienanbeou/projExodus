@@ -1,0 +1,434 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260928025011
+Username: LAPTOP-RDEG94B3\ADMIN
+RunAs User: LAPTOP-RDEG94B3\ADMIN
+Configuration Name: 
+Machine: LAPTOP-RDEG94B3 (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 21628
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is .\drill-auto.log
+PS D:\config\second brain i guess\4.Projects\projExodus\scripts> .\drill.ps1 auto -Trials 15
+
+=== trial 1 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   8s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 164s
+[ 170s] waiting: dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+dns      up at 172s
+[ 175s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 192s
+[ 195s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 208s
+cloud    up at 209s
+[ 211s] waiting: music (timeout), immich (timeout)
+music    up at 213s
+[ 216s] waiting: immich (timeout)
+immich   up at 218s
+trials: 6  valid: 6  recovered: 6
+median: 218.5s  worst: 224s
+settling 120s
+
+=== trial 2 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 155s
+[ 161s] waiting: dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+dns      up at 163s
+[ 166s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 188s
+[ 191s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+cloud    up at 209s
+[ 212s] waiting: vault (timeout), music (timeout), immich (timeout)
+music    up at 220s
+immich   up at 219s
+[ 222s] waiting: vault (timeout)
+vault    up at 224s
+trials: 7  valid: 7  recovered: 7
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 3 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   7s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 163s
+dns      up at 168s
+[ 168s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 191s
+[ 194s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 211s
+cloud    up at 212s
+music    up at 211s
+[ 214s] waiting: immich (timeout)
+immich   up at 216s
+trials: 8  valid: 8  recovered: 8
+median: 218.5s  worst: 224s
+settling 120s
+
+=== trial 4 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 163s
+dns      up at 163s
+[ 166s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 193s
+[ 196s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+music    up at 205s
+[ 206s] waiting: vault (timeout), cloud (timeout), immich (timeout)
+vault    up at 216s
+[ 217s] waiting: cloud (timeout), immich (timeout)
+cloud    up at 219s
+immich   up at 220s
+trials: 9  valid: 9  recovered: 9
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 5 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 163s
+dns      up at 167s
+[ 167s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 189s
+[ 192s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+cloud    up at 210s
+music    up at 210s
+[ 213s] waiting: vault (timeout), immich (timeout)
+vault    up at 215s
+[ 217s] waiting: immich (unreachable)
+immich   up at 219s
+trials: 10  valid: 10  recovered: 10
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 6 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 156s
+[ 161s] waiting: dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+dns      up at 163s
+[ 166s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 193s
+[ 196s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 209s
+cloud    up at 209s
+music    up at 209s
+[ 212s] waiting: immich (timeout)
+immich   up at 224s
+trials: 11  valid: 11  recovered: 11
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 7 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 163s
+dns      up at 167s
+[ 167s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 189s
+[ 192s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 215s
+cloud    up at 215s
+music    up at 215s
+immich   up at 216s
+trials: 12  valid: 12  recovered: 12
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 8 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 156s
+[ 161s] waiting: dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+dns      up at 163s
+[ 166s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 189s
+[ 191s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 214s
+cloud    up at 214s
+music    up at 214s
+[ 217s] waiting: immich (timeout)
+[ 221s] waiting: immich (unreachable)
+immich   up at 223s
+trials: 13  valid: 13  recovered: 13
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 9 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 163s
+dns      up at 167s
+[ 167s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 190s
+[ 193s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 210s
+cloud    up at 210s
+music    up at 211s
+[ 213s] waiting: immich (timeout)
+immich   up at 215s
+trials: 14  valid: 14  recovered: 14
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 10 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 163s
+dns      up at 163s
+[ 166s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 193s
+[ 196s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 208s
+music    up at 209s
+[ 211s] waiting: cloud (timeout), immich (timeout)
+cloud    up at 214s
+[ 217s] waiting: immich (timeout)
+immich   up at 224s
+trials: 15  valid: 15  recovered: 15
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 11 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 163s
+dns      up at 168s
+[ 168s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 191s
+[ 194s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 217s
+cloud    up at 217s
+music    up at 217s
+immich   up at 217s
+trials: 16  valid: 16  recovered: 16
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 12 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   7s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 156s
+[ 161s] waiting: dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+dns      up at 163s
+[ 166s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 194s
+[ 196s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 209s
+music    up at 209s
+[ 212s] waiting: cloud (timeout), immich (timeout)
+cloud    up at 219s
+immich   up at 220s
+trials: 17  valid: 17  recovered: 17
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 13 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 163s
+dns      up at 168s
+[ 168s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 191s
+[ 194s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 211s
+cloud    up at 212s
+music    up at 211s
+[ 214s] waiting: immich (timeout)
+immich   up at 216s
+trials: 18  valid: 18  recovered: 18
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 14 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 155s
+[ 161s] waiting: dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+dns      up at 163s
+[ 166s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 188s
+[ 191s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 209s
+cloud    up at 209s
+music    up at 209s
+[ 212s] waiting: immich (timeout)
+immich   up at 219s
+trials: 19  valid: 19  recovered: 19
+median: 219s  worst: 224s
+settling 120s
+
+=== trial 15 of 15 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+powering off node1
+node1 is off the LAN; waiting 30s so it is fully powered down
+rebooting the R3P, timer starts now
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 163s
+dns      up at 168s
+[ 168s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 190s
+[ 193s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 206s
+cloud    up at 207s
+music    up at 206s
+[ 209s] waiting: immich (timeout)
+immich   up at 217s
+trials: 20  valid: 20  recovered: 20
+median: 219s  worst: 224s

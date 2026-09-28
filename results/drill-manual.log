@@ -1,0 +1,346 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260928121825
+Username: LAPTOP-RDEG94B3\ADMIN
+RunAs User: LAPTOP-RDEG94B3\ADMIN
+Configuration Name: 
+Machine: LAPTOP-RDEG94B3 (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 22588
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is .\drill-manual.log
+PS D:\config\second brain i guess\4.Projects\projExodus\scripts> .\cold-drill.ps1 manual -Trials 3
+
+=== manual trial 1 of 3 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+
+Leave the strip OFF for 480 s while the power watcher shuts node1 down.
+    480s left
+    470s left
+    460s left
+    450s left
+    440s left
+    430s left
+    420s left
+    410s left
+    400s left
+    390s left
+    380s left
+    370s left
+    360s left
+    350s left
+    340s left
+    330s left
+    320s left
+    310s left
+    300s left
+    290s left
+    280s left
+    270s left
+    260s left
+    250s left
+    240s left
+    230s left
+    220s left
+    210s left
+    200s left
+    190s left
+    180s left
+    170s left
+    160s left
+    150s left
+    140s left
+    130s left
+    120s left
+    110s left
+    100s left
+     90s left
+     80s left
+     70s left
+     60s left
+     50s left
+     40s left
+     30s left
+     20s left
+     10s left
+  done
+
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 158s
+dns      up at 158s
+[ 161s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 183s
+[ 186s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+cloud    up at 204s
+[ 207s] waiting: vault (timeout), music (timeout), immich (timeout)
+vault    up at 209s
+music    up at 210s
+immich   up at 209s
+node1 powered off 364s after the cut; clean shutdown: True; off before power returned: True
+trials: 1  valid: 1  recovered: 1
+median: 210s  worst: 210s
+Letting the UPS recharge for 1500 s before the next cut.
+   1500s left
+   1490s left
+   1480s left
+   1470s left
+   1460s left
+   1450s left
+   1440s left
+   1430s left
+   1420s left
+   1410s left
+   1400s left
+   1390s left
+   1380s left
+   1370s left
+   1360s left
+   1350s left
+   1340s left
+   1330s left
+   1320s left
+   1310s left
+   1300s left
+   1290s left
+   1280s left
+   1270s left
+   1260s left
+   1250s left
+   1240s left
+   1230s left
+   1220s left
+   1210s left
+   1200s left
+   1190s left
+   1180s left
+   1170s left
+   1160s left
+   1150s left
+   1140s left
+PS D:\config\second brain i guess\4.Projects\projExodus\scripts> TerminatingError(): "The pipeline has been stopped."
+>> TerminatingError(): "The pipeline has been stopped."
+>> TerminatingError(): "The pipeline has been stopped."
+>> TerminatingError(): "The pipeline has been stopped."
+PS D:\config\second brain i guess\4.Projects\projExodus\scripts> Stop-Transcript
+**********************
+Windows PowerShell transcript end
+End time: 20260928123631
+**********************
+**********************
+Windows PowerShell transcript start
+Start time: 20260928123640
+Username: LAPTOP-RDEG94B3\ADMIN
+RunAs User: LAPTOP-RDEG94B3\ADMIN
+Configuration Name: 
+Machine: LAPTOP-RDEG94B3 (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 22588
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is .\drill-manual.log
+PS D:\config\second brain i guess\4.Projects\projExodus\scripts> .\cold-drill.ps1 manual -Trials 1
+
+=== manual trial 1 of 1 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+
+Leave the strip OFF for 480 s while the power watcher shuts node1 down.
+    480s left
+    470s left
+    460s left
+    450s left
+    440s left
+    430s left
+    420s left
+    410s left
+    400s left
+    390s left
+    380s left
+    370s left
+    360s left
+    350s left
+    340s left
+    330s left
+    320s left
+    310s left
+    300s left
+    290s left
+    280s left
+    270s left
+    260s left
+    250s left
+    240s left
+    230s left
+    220s left
+    210s left
+    200s left
+    190s left
+    180s left
+    170s left
+    160s left
+    150s left
+    140s left
+    130s left
+    120s left
+    110s left
+    100s left
+     90s left
+     80s left
+     70s left
+     60s left
+     50s left
+     40s left
+     30s left
+     20s left
+     10s left
+  done
+
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 158s
+dns      up at 161s
+[ 161s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 184s
+[ 187s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+cloud    up at 199s
+music    up at 199s
+[ 202s] waiting: vault (timeout), immich (timeout)
+vault    up at 206s
+[ 207s] waiting: immich (timeout)
+immich   up at 220s
+node1 powered off 354s after the cut; clean shutdown: True; off before power returned: True
+trials: 2  valid: 2  recovered: 2
+median: 215s  worst: 220s
+PS D:\config\second brain i guess\4.Projects\projExodus\scripts> Stop-Transcript
+**********************
+Windows PowerShell transcript end
+End time: 20260928124917
+**********************
+**********************
+Windows PowerShell transcript start
+Start time: 20260928124921
+Username: LAPTOP-RDEG94B3\ADMIN
+RunAs User: LAPTOP-RDEG94B3\ADMIN
+Configuration Name: 
+Machine: LAPTOP-RDEG94B3 (Microsoft Windows NT 10.0.26200.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 22588
+PSVersion: 5.1.26100.9444
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9444
+BuildVersion: 10.0.26100.9444
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is .\drill-manual.log
+PS D:\config\second brain i guess\4.Projects\projExodus\scripts> .\cold-drill.ps1 manual -Trials 1
+
+=== manual trial 1 of 1 ===
+baseline: everything must be up before the outage
+host     up at 0s
+dns      up at 0s
+vault    up at 0s
+cloud    up at 0s
+music    up at 0s
+immich   up at 0s
+grafana  up at 0s
+
+Leave the strip OFF for 480 s while the power watcher shuts node1 down.
+    480s left
+    470s left
+    460s left
+    450s left
+    440s left
+    430s left
+    420s left
+    410s left
+    400s left
+    390s left
+    380s left
+    370s left
+    360s left
+    350s left
+    340s left
+    330s left
+    320s left
+    310s left
+    300s left
+    290s left
+    280s left
+    270s left
+    260s left
+    250s left
+    240s left
+    230s left
+    220s left
+    210s left
+    200s left
+    190s left
+    180s left
+    170s left
+    160s left
+    150s left
+    140s left
+    130s left
+    120s left
+    110s left
+    100s left
+     90s left
+     80s left
+     70s left
+     60s left
+     50s left
+     40s left
+     30s left
+     20s left
+     10s left
+  done
+
+[   6s] waiting: host (timeout), dns (no answer), vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+host     up at 159s
+dns      up at 162s
+[ 162s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout), grafana (timeout)
+grafana  up at 185s
+[ 188s] waiting: vault (timeout), cloud (timeout), music (timeout), immich (timeout)
+vault    up at 206s
+cloud    up at 206s
+music    up at 206s
+[ 208s] waiting: immich (timeout)
+immich   up at 210s
+node1 powered off 359s after the cut; clean shutdown: True; off before power returned: True
+trials: 3  valid: 3  recovered: 3
+median: 210s  worst: 220s
+PS D:\config\second brain i guess\4.Projects\projExodus\scripts> Stop-Transcript
+**********************
+Windows PowerShell transcript end
+End time: 20260928130830
+**********************

@@ -1,0 +1,4 @@
+"date","recovered","instrument_ok","host","dns","vault","cloud","music","immich","grafana","total","stuck","note","node1_off_s","clean_shutdown","off_before_restore"
+"2026-09-28T12:26:51","True","True","158","158","209","204","210","209","183","210","","manual","364","True","True"
+"2026-09-28T12:45:21","True","True","158","161","206","199","199","220","184","220","","manual","354","True","True"
+"2026-09-28T12:59:22","True","True","159","162","206","206","206","210","185","210","","manual","359","True","True"

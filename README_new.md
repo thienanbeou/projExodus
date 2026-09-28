@@ -83,9 +83,10 @@ Retiring, not migrating: CasaOS and the rclone, devmon and mergerfs helpers it b
 - An ES208G switch was on the way, and the wiring between the current hardware had to be redone before proceeding.
 
 ## Migration Aftermath
-<!-- TODO: cold power loss trials. Either run them (median recovery over 10 pulls) and fill this in, or delete the line. -->
-- Full stack recovers from cold power loss in a median of N s over 10 trials, versus the old host failing to boot in 10 of 10.
-- Data integrity, verified rather than assumed:
+- Power loss recovery (see [Aftermath Simulations](<#aftermath-simulations>)):
+	- After a real power cut, node1 shuts down cleanly on UPS battery about 6 minutes in, and the full stack is back a median of 210 seconds across 20 automated tests after power returns, with no one on site (3 of 3 trials)
+	- The old host needed someone on site for every outage, and routinely failed to reach POST on a cold start
+- Data integrity:
 	- Immich: checksum dry run found 5,233 files (94.76 GB) identical, 0 missing
 	- PvO v4: 3,833 files transferred, 3,833 indexed by Nextcloud, 0 errors
 	- Minecraft archive: all 9 items present in Nextcloud, matching the original archive
@@ -118,5 +119,18 @@ Both VMs also run node_exporter and cAdvisor, so every guest reports resource me
 ### Known limitations
 - The HDD is a single point of failure for Immich originals and PvO v4. PvO v4 still has its external copy; Immich's only other copy is the frozen SSD copy of originals on the same node. Off-node backup waits on a future node2 NAS.
 - No host or thin pool metrics yet; prometheus-pve-exporter on pve is deferred.
+- The tailnet's only DNS nameserver is pihole-dns, so while node1 is down every tailnet device loses name resolution. Found during the recovery drills. Adding a fallback nameserver in Tailscale's DNS settings would fix it, at the cost of some queries bypassing Pi-hole during outages.
 
 ### Aftermath Simulations
+> (for method, per-service timings and limits, check out [recovery-drills](<./docs/recovery-drills.md>))
+
+| Drill                                        | Trials | Recovered | Median | Range        |
+| -------------------------------------------- | ------ | --------- | ------ | ------------ |
+| Real power cut (strip off 8 min, then on)    | 3      | 3         | 210 s  | 210 to 220 s |
+| Simulated outage (node1 off, router reboot)  | 20     | 20        | 219 s  | 215 to 224 s |
+
+- The power watcher shuts node1 down cleanly on UPS battery (354 to 364 s after the cut, clean every time), then the R3P wakes it by WoL once power returns.
+- The simulated outages ran unattended and show how repeatable the wake and boot half is: a 9 s spread over 20 trials.
+- About 60 s of every recovery is a deliberate wait: `wol-node1.sh` holds off for 60 s after the R3P boots before it tries to wake node1. Cutting it would bring the median down by up to about a minute, but it's there on purpose:
+	- Power often flickers back and forth right after an outage. Waking node1 straight away risks booting it into a second cut, while its UPS is still nearly drained from the first, and that would be a hard crash with no battery left for a clean shutdown.
+	- The R3P's LAN bridge and the switch need a moment to come fully up after a cold start. A magic packet sent before they're ready is simply lost.

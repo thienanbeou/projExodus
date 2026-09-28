@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
-# homelab-inventory.sh — read-only inventory of the CasaOS box, input for the node1 migration plan.
+# homelab-inventory.sh
+# Read-only inventory of debianWozzy (CasaOS host). Input for the node1 migration plan.
 #
-#   sudo bash homelab-inventory.sh
+# Usage: sudo bash homelab-inventory.sh
 #
-# Writes /root/inventory-<host>-<date>/
-#   SUMMARY.md  -> send this back (skim the Cron section for tokens first)
-#   compose/    -> compose files, .env, CasaOS app defs = SECRETS, keep on the box
-# plus a chmod-600 tarball of both. Restarts nothing, changes nothing outside that dir.
+# Output: /root/inventory-<host>-<date>/
+#   SUMMARY.md  report of host, storage, network, services and containers.
+#               Check the Cron section for tokens before sharing it anywhere.
+#   compose/    compose files, .env files and CasaOS app definitions.
+#               Contains secrets, never leaves the box.
+#   Both are also packed into a tarball (chmod 600).
+# Nothing is restarted or modified outside the output directory.
 #
-# v2: folds in the SMART, Samba, Apache, tsdproxy and immich-postgres health-log
-# checks that were run by hand after the first pass, so this copy is self-contained.
+# v2: added SMART, Samba, Apache, tsdproxy and immich-postgres health checks
+#     (checked manually during v1).
 
 set -u
 [ "$(id -u)" -eq 0 ] || { echo "run with sudo"; exit 1; }
@@ -17,10 +21,11 @@ set -u
 OUT=/root/inventory-$(hostname -s)-$(date +%F)
 S=$OUT/SUMMARY.md
 mkdir -p "$OUT/compose" && chmod 700 "$OUT"
-echo "# Inventory: $(hostname) — $(date '+%F %T')" >"$S"
+echo "# Inventory: $(hostname) ($(date '+%F %T'))" >"$S"
 
-# sec "Title" 'shell | pipeline'  -> fenced block in SUMMARY.md; a failing command never stops the run.
-# ponytail: flat 30-min cap per section; raise it if the du over Nextcloud data gets cut off.
+# sec TITLE CMD: runs CMD and appends its output to SUMMARY.md as a fenced block.
+# stderr is captured too, so a failing command shows up in the report instead of stopping the run.
+# Each section times out after 30 min. Increase it if the du on Nextcloud data gets cut off.
 sec() { printf '\n## %s\n```\n' "$1" >>"$S"; timeout 1800 bash -c "$2" >>"$S" 2>&1; printf '```\n' >>"$S"; }
 
 # ---------- host & storage ----------
@@ -35,7 +40,7 @@ sec "Tailscale" 'tailscale version | head -1; tailscale ip; tailscale status --p
 sec "Listening ports" 'ss -tulpn'
 sec "Host firewall (custom INPUT rules / ufw)" 'iptables -S INPUT; command -v ufw >/dev/null && ufw status verbose'
 
-# ---------- host-level services & schedules (anything living outside Docker) ----------
+# ---------- host-level services & schedules (anything outside Docker) ----------
 sec "Running host services" 'systemctl list-units --type=service --state=running --no-pager --no-legend | awk "{print \$1}"'
 sec "Custom units in /etc/systemd/system" 'find /etc/systemd/system -maxdepth 1 -type f \( -name "*.service" -o -name "*.timer" -o -name "*.mount" \)'
 sec "Timers" 'systemctl list-timers --all --no-pager'
@@ -46,34 +51,36 @@ sec "Apache vhosts" 'grep -hE "^\s*(Listen|DocumentRoot|ServerName|ProxyPass)" /
 
 # ---------- docker ----------
 if ! command -v docker >/dev/null; then echo "docker not found" >>"$S"; else
-  IDS=$(docker ps -aq | tr '\n' ' '); export IDS
+IDS=$(docker ps -aq | tr '\n' ' '); export IDS
+sec "Docker engine & volumes" 'docker version --format "Engine {{.Server.Version}}"; docker compose version; docker info --format "Root dir: {{.DockerRootDir}} Driver: {{.Driver}}"; echo; docker system df; echo; docker system df -v | sed -n "/Local Volumes/,/Build cache/p"'
 
-  sec "Docker engine & volumes" 'docker version --format "Engine {{.Server.Version}}"; docker compose version; docker info --format "Root dir: {{.DockerRootDir}}  Driver: {{.Driver}}"; echo; docker system df; echo; docker system df -v | sed -n "/Local Volumes/,/Build cache/p"'
+# Go template for docker inspect: one Markdown table row per container.
+# Columns: name, image, state/health, restart policy, network mode, port bindings,
+# mounts (named volumes as vol:<name>, read-only marked ro), compose project, privileged flag and devices.
+F='| {{.Name}} | {{.Config.Image}} | {{.State.Status}}{{if index .State "Health"}}/{{.State.Health.Status}}{{end}} | {{.HostConfig.RestartPolicy.Name}} | {{.HostConfig.NetworkMode}} | {{range $p, $b := .HostConfig.PortBindings}}{{range $b}}{{if .HostIp}}{{.HostIp}}:{{end}}{{.HostPort}}{{end}}->{{$p}} {{end}}| {{range .Mounts}}{{if eq .Type "volume"}}vol:{{.Name}}{{else}}{{.Source}}{{end}}->{{.Destination}}{{if not .RW}}(ro){{end}}; {{end}}| {{index .Config.Labels "com.docker.compose.project"}} | {{if .HostConfig.Privileged}}privileged {{end}}{{range .HostConfig.Devices}}{{.PathOnHost}} {{end}}|'
 
-  F='| {{.Name}} | {{.Config.Image}} | {{.State.Status}}{{if index .State "Health"}}/{{.State.Health.Status}}{{end}} | {{.HostConfig.RestartPolicy.Name}} | {{.HostConfig.NetworkMode}} | {{range $p, $b := .HostConfig.PortBindings}}{{range $b}}{{if .HostIp}}{{.HostIp}}:{{end}}{{.HostPort}}{{end}}->{{$p}} {{end}}| {{range .Mounts}}{{if eq .Type "volume"}}vol:{{.Name}}{{else}}{{.Source}}{{end}}->{{.Destination}}{{if not .RW}}(ro){{end}}; {{end}}| {{index .Config.Labels "com.docker.compose.project"}} | {{if .HostConfig.Privileged}}privileged {{end}}{{range .HostConfig.Devices}}{{.PathOnHost}} {{end}}|'
-  { printf '\n## Containers (empty compose project = plain docker run)\n'
-    printf '| name | image | state | restart | network | ports | mounts | compose project | privileged/devices |\n|---|---|---|---|---|---|---|---|---|\n'
-    docker inspect -f "$F" $IDS; } >>"$S" 2>&1
+{ printf '\n## Containers (empty compose project = plain docker run)\n'
+printf '| name | image | state | restart | network | ports | mounts | compose project | privileged/devices |\n|---|---|---|---|---|---|---|---|---|\n'
+docker inspect -f "$F" $IDS; } >>"$S" 2>&1
 
-  sec "Docker networks -> members" 'for n in $(docker network ls -q); do docker network inspect -f "{{.Name}} [{{.Driver}}] {{range .IPAM.Config}}{{.Subnet}} {{end}}: {{range .Containers}}{{.Name}} {{end}}" "$n"; done'
+sec "Docker networks -> members" 'for n in $(docker network ls -q); do docker network inspect -f "{{.Name}} [{{.Driver}}] {{range .IPAM.Config}}{{.Subnet}} {{end}}: {{range .Containers}}{{.Name}} {{end}}" "$n"; done'
+sec "tsdproxy-published containers" 'docker ps -a --filter label=tsdproxy.enable --format "{{.Names}}"'
 
-  sec "tsdproxy-published containers" 'docker ps -a --filter label=tsdproxy.enable --format "{{.Names}}"'
+# Excludes pseudo-mounts: / (node_exporter), /sys, /proc, /var/lib/docker (cAdvisor), docker.sock.
+sec "Container data on disk (bind sources + volumes; nested paths double-count)" 'docker inspect -f "{{range .Mounts}}{{.Source}}{{println}}{{end}}" $IDS | sort -u | grep -vE "^/$|^/(proc|sys|dev|run|var/run|boot|etc|lib|usr)(/|$)|^/var/lib/docker$" | while read -r p; do [ -d "$p" ] && ionice -c3 nice -n19 du -sxh "$p"; done | sort -h'
+sec "immich-postgres health-check log" 'docker inspect -f "{{range .State.Health.Log}}{{.Output}}{{end}}" immich-postgres 2>/dev/null | tail -n 5'
 
-  # Skips pseudo-mounts like / (node_exporter), /sys, /proc, /var/lib/docker (cAdvisor), docker.sock.
-  sec "Container data on disk (bind sources + volumes; nested paths double-count)" 'docker inspect -f "{{range .Mounts}}{{.Source}}{{println}}{{end}}" $IDS | sort -u | grep -vE "^/$|^/(proc|sys|dev|run|var/run|boot|etc|lib|usr)(/|$)|^/var/lib/docker$" | while read -r p; do [ -d "$p" ] && ionice -c3 nice -n19 du -sxh "$p"; done | sort -h'
-
-  sec "immich-postgres health-check log (context for the healthcheck-broken note)" 'docker inspect -f "{{range .State.Health.Log}}{{.Output}}{{end}}" immich-postgres 2>/dev/null | tail -n 5'
-
-  # Compose files (+ neighbouring .env) of every compose-managed container, plus CasaOS app definitions.
-  docker inspect -f '{{index .Config.Labels "com.docker.compose.project.config_files"}}' $IDS | tr ',' '\n' | sort -u |
-    while read -r f; do
-      [ -f "$f" ] || continue
-      cp --parents "$f" "$OUT/compose/"
-      [ -f "$(dirname "$f")/.env" ] && cp --parents "$(dirname "$f")/.env" "$OUT/compose/"
-    done
-  for d in /var/lib/casaos/apps /etc/casaos; do [ -d "$d" ] && cp -r --parents "$d" "$OUT/compose/"; done
-  sec "Compose files collected (copies in compose/, contain secrets)" "cd '$OUT/compose' && find . -type f | sort"
+# Copy the compose file (and its .env, if present) of every compose-managed container,
+# plus the CasaOS app definitions.
+docker inspect -f '{{index .Config.Labels "com.docker.compose.project.config_files"}}' $IDS | tr ',' '\n' | sort -u |
+while read -r f; do
+  [ -f "$f" ] || continue
+  cp --parents "$f" "$OUT/compose/"
+  [ -f "$(dirname "$f")/.env" ] && cp --parents "$(dirname "$f")/.env" "$OUT/compose/"
+done
+for d in /var/lib/casaos/apps /etc/casaos; do [ -d "$d" ] && cp -r --parents "$d" "$OUT/compose/"; done
+sec "Compose files collected (copies in compose/, contain secrets)" "cd '$OUT/compose' && find . -type f | sort"
 fi
 
 tar -C /root -czf "$OUT.tar.gz" "$(basename "$OUT")" && chmod 600 "$OUT.tar.gz"
-echo "Done -> $S   (bundle: $OUT.tar.gz)"
+echo "Done -> $S (bundle: $OUT.tar.gz)"
