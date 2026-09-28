@@ -1,8 +1,25 @@
 ## Introduction
 - debianWozzy, the old homelab host, had become unstable with age. It regularly got stuck at BIOS and failed to boot into Debian/CasaOS on cold starts. On top of that, its laptop board had no Wake-on-LAN support, which the onsite location needs since it sometimes loses power without warning.
 ![](<./images/debianWozzy.png>)
-- So everything had to move to a more stable platform: [node1](<./README.md#target-node1>).
+- So everything had to move to a more stable platform: [node1](<#target-node1>).
 - Codename: projExodus, commemorating the move off the old hardware.
+
+## Table of Contents
+- [Introduction](<#introduction>)
+- [Migration Overview](<#migration-overview>)
+- [Pre-migration Asset Inventory](<#pre-migration-asset-inventory>)
+- [Migration Aftermath](<#migration-aftermath>)
+	- [node1 layout](<#node1-layout>)
+	- [Storage](<#storage>)
+	- [Known limitations](<#known-limitations>)
+	- [Aftermath Simulations](<#aftermath-simulations>)
+- [Afterword](<#afterword>)
+- More detail
+	- [migration-in-detail](<./docs/migration-in-detail.md>)
+	- [node1-validation](<./docs/node1-validation.md>)
+	- [crafty-backup-audit](<./docs/crafty-backup-audit.md>)
+	- [recovery-drills](<./docs/recovery-drills.md>)
+	- [scripts](<./scripts/>) and [results](<./results/>)
 
 ## Migration Overview
 > (for more details check out [migration-in-detail](<./docs/migration-in-detail.md>))
@@ -38,7 +55,7 @@
 
 ## Pre-migration Asset Inventory
 > [!NOTE]
-> This section is a snapshot of debianWozzy before the migration. For the end state, see [Migration Aftermath](<./README.md#migration-aftermath>).
+> This section is a snapshot of debianWozzy before the migration. For the end state, see [Migration Aftermath](<#migration-aftermath>).
 
 ### Source host: debianWozzy
 - ASUS X550LN, i5-4200U (2C/4T), 8 GB DDR3L, single 750 GB WD7500BPKX HDD (25,932 power-on hours, SMART clean).
@@ -83,8 +100,8 @@ Retiring, not migrating: CasaOS and the rclone, devmon and mergerfs helpers it b
 - An ES208G switch was on the way, and the wiring between the current hardware had to be redone before proceeding.
 
 ## Migration Aftermath
-- Power loss recovery (see [Aftermath Simulations](<./README.md#aftermath-simulations>)):
-	- After a real power cut, node1 shuts down cleanly on UPS battery about 6 minutes in, and the full stack is back a median of 210 seconds across 20 automated tests after power returns, with no one on site (3 of 3 trials)
+- Power loss recovery:
+	- After a real power cut, node1 shuts down cleanly on UPS battery about 6 minutes in, and the full stack is back a median of 219 seconds across 20 automated tests after power returns, with no one on site (more on [Aftermath Simulations](<#aftermath-simulations>))
 	- The old host needed someone on site for every outage, and routinely failed to reach POST on a cold start
 - Data integrity:
 	- Immich: checksum dry run found 5,233 files (94.76 GB) identical, 0 missing
@@ -134,3 +151,13 @@ Both VMs also run node_exporter and cAdvisor, so every guest reports resource me
 - About 60 s of every recovery is a deliberate wait: `wol-node1.sh` holds off for 60 s after the R3P boots before it tries to wake node1. Cutting it would bring the median down by up to about a minute, but it's there on purpose:
 	- Power often flickers back and forth right after an outage. Waking node1 straight away risks booting it into a second cut, while its UPS is still nearly drained from the first, and that would be a hard crash with no battery left for a clean shutdown.
 	- The R3P's LAN bridge and the switch need a moment to come fully up after a cold start. A magic packet sent before they're ready is simply lost.
+
+## Afterword
+debianWozzy was my high school laptop long before it was a server, from well before 2017 and well before I had any idea I'd end up running a homelab. It went from a daily gaming/studying machine to being a headless box in the corner, and it kept going anyway: DNS for the whole tailnet, my photo library, my music streaming server, my passwords, a Minecraft world, all on a fourth-gen dual-core i5 and 8 GB of RAM. It even helped land me my first real job.
+
+Its disk logged 25,932 power-on hours, nearly three years of running, and still passed its SMART long test clean at the end. It was the machine around the disk that wore out first, getting stuck at BIOS on cold starts and never learning Wake-on-LAN. 
+
+This move wasn't really a replacement, more of a retirement. Everything it carried was verified and carried over, and the disk that outlasted the rest of it now lives on in node1 as `hdd-thin`, holding Nextcloud and Immich. So a piece of debianWozzy is still on duty.
+
+Goodbye, old friend. This is no mere project; this is my final farewell to you. 
+Thank you for your service. 
